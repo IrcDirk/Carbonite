@@ -2044,11 +2044,13 @@ function CarboniteQuest:OnInitialize()
 
 	if not cap or cap.Version < Nx.VERSIONCAP then
 		cap = {}
-		cap.Version = Nx.VERSIONCAP
 		cap["Q"] = {}
+		cap = Nx.VERSIONCAP
 		NXQuest.Gather = cap
 	end
-
+	
+	NXQuest.Gather.UserLocale = GetLocale()
+	
 	Nx.Quest:Init()
 	if Nx.qdb.profile.Quest.Enable then
 		Nx.Quest:HideUIPanel (_G["QuestMapFrame"])
