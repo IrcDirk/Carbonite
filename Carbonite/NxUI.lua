@@ -113,7 +113,7 @@ function Nx.prt (...)
 	args[1] = string.gsub((args[1] or 'nil'), '(%%[0-9.]*([cdeEfgGioqsuxX]))', replace_placeholders)
 
 	local f = Nx.prtChatFrm or DEFAULT_CHAT_FRAME
-	f:AddMessage (Nx.TXTBLUE..L["Carbonite"].." |cffffffff".. format (unpack(args)), 1, 1, 1)
+	f:AddMessage ("|cffff0000[" .. Nx.TXTBLUE..L["Carbonite"].."|cffff0000] |cffffffff".. format (unpack(args)), 1, 1, 1)
 end
 
 function Nx.prtraw (msg)
@@ -127,9 +127,9 @@ function Nx.prtError (msg, ...)
 end
 
 -- Debug print
-function Nx.prtD (msg)
+function Nx.prtD (...)
 	if Nx.DebugOn then
-		Nx.prt (msg)
+		Nx.prt (...)
 	end
 end
 
@@ -1828,7 +1828,7 @@ end
 ---------------------------------------------------------------------------------------
 
 function Nx.Window:Adjust (skipChildren)
-	if InCombatLockdown() and Nx.db.profile.Map.Compatability then
+	if InCombatLockdown() and Nx.db.profile.Map.Compatibility then
 		return
 	end
 	local f = self.Frm
@@ -1845,73 +1845,74 @@ function Nx.Window:Adjust (skipChildren)
 		local x, y
 
 		for n = 1, #self.ChildFrms do
-
+			
 			local child = self.ChildFrms[n]
 			local cf = child.Frm
+			
+			if cf and not cf:IsProtected() then			
+				x = child.PosX1
+				if x < 0 then
+					x = w + x	-- Offset from right edge
+				elseif x <= 1 then
+					x = w * x	-- Percent
+				end
 
-			x = child.PosX1
-			if x < 0 then
-				x = w + x	-- Offset from right edge
-			elseif x <= 1 then
-				x = w * x	-- Percent
-			end
+				local x2 = child.PosX2
+				if x2 < 0 then
+					x2 = w + x2	-- Offset from right edge
+				elseif x2 <= 1 then
+					x2 = w * x2	-- Percent
+				end
 
-			local x2 = child.PosX2
-			if x2 < 0 then
-				x2 = w + x2	-- Offset from right edge
-			elseif x2 <= 1 then
-				x2 = w * x2	-- Percent
-			end
+				y = child.PosY1
+				if y <= -10000 then
+					y = y + 10000
+				elseif y < 0 then
+					y = h + y
+				elseif y <= 1 then
+					y = h * y
+				end
 
-			y = child.PosY1
-			if y <= -10000 then
-				y = y + 10000
-			elseif y < 0 then
-				y = h + y
-			elseif y <= 1 then
-				y = h * y
-			end
+				local y2 = child.PosY2
+				if y2 <= -10000 then
+					y2 = y2 + 10000
+				elseif y2 < 0 then
+					y2 = h + y2
+				elseif y2 <= 1 then
+					y2 = h * y2
+				end
 
-			local y2 = child.PosY2
-			if y2 <= -10000 then
-				y2 = y2 + 10000
-			elseif y2 < 0 then
-				y2 = h + y2
-			elseif y2 <= 1 then
-				y2 = h * y2
-			end
+				cf:SetPoint ("TOPLEFT", f, "TOPLEFT", x + self.BorderW, -y - self.TopH)
 
-			cf:SetPoint ("TOPLEFT", f, "TOPLEFT", x + self.BorderW, -y - self.TopH)
+				local childW = x2 - x
+				local childH = y2 - y
 
-			local childW = x2 - x
-			local childH = y2 - y
+				if child.ScaleW then
 
-			if child.ScaleW then
+					local sw = childW / child.ScaleW
+					local sh = childH / child.ScaleH
+					local scale = max (min (sw, sh), .001)
+					cf:SetScale (scale)
 
-				local sw = childW / child.ScaleW
-				local sh = childH / child.ScaleH
-				local scale = max (min (sw, sh), .001)
-				cf:SetScale (scale)
+					cf:SetPoint ("TOPLEFT", f, "TOPLEFT", (self.BorderW + w * child.PosX1) / scale, (-self.TopH - h * child.PosY1) / scale)
 
-				cf:SetPoint ("TOPLEFT", f, "TOPLEFT", (self.BorderW + w * child.PosX1) / scale, (-self.TopH - h * child.PosY1) / scale)
-
-			else
-
-				local inst = cf.NxInst
-
-				if inst and inst.SetSize then
-					inst:SetSize (childW, childH)
 				else
-					cf:SetWidth (childW)
-					cf:SetHeight (childH)
+
+					local inst = cf.NxInst
+
+					if inst and inst.SetSize then
+						inst:SetSize (childW, childH)
+					else
+						cf:SetWidth (childW)
+						cf:SetHeight (childH)
+					end
+				end
+
+				if cf.NxSetSize then
+					cf:NxSetSize (childW, childH)
 				end
 			end
-
-			if cf.NxSetSize then
-				cf:NxSetSize (childW, childH)
-			end
-
---			prtFrame ("Adj"..n, cf)
+			--			prtFrame ("Adj"..n, cf)
 		end
 	end
 end
@@ -2428,7 +2429,7 @@ end
 ---------------------------------------------------------------------------------------
 
 function Nx.Window:SetLayoutMode (mode)
-	if InCombatLockdown() and Nx.db.profile.Map.Compatability then
+	if InCombatLockdown() and Nx.db.profile.Map.Compatibility then
 		return
 	end
 	local data = self.SaveData
@@ -2806,6 +2807,7 @@ end
 
 function Nx.Window:OnMinBut (but, id, click)
 	self:SetMinimize (but:GetPressed())
+	self.SaveData["Minimized"] = but:GetPressed()
 end
 
 function Nx.Window:ToggleMinimize()
@@ -5099,9 +5101,9 @@ function Nx.List:GetFrame (list, typ)
 		self.FrmsUniqueI = self.FrmsUniqueI + 1
 		if typ == "Color" then
 			f = CreateFrame ("ColorSelect", nil, list.Frm)
-		elseif typ == "WatchItem" then
-			f = CreateFrame ("Button", "NxListFrms" .. self.FrmsUniqueI, list.Frm, "NxWatchListItem")
-			f:SetAttribute ("type1", "item")
+		elseif typ == "WatchItem" then							
+				f = CreateFrame ("Button", "NxListFrms" .. self.FrmsUniqueI, list.Frm, "NxWatchListItem")
+				f:SetAttribute ("type1", "item")			
 		elseif typ == "Info" then
 			f = Nx.Info:CreateFrame (list.Frm)
 		end
@@ -5860,8 +5862,7 @@ function Nx.List:Update (showLast)
 					f:SetHeight (30)
 					f:SetAlpha (self.ItemFrameAlpha)
 
-					local id = tonumber (v1)
-
+					local id = tonumber (v1)					
 					f:SetID (id)
 
 					SetItemButtonTexture (f, v2);
@@ -6443,7 +6444,7 @@ function Nx.List:OnMouseDown (click)
 
 			local id = inst:ColumnHitTest (x)
 
-			if id and inst.UserFunc then
+			if id and inst.UserFunc then				
 				inst.UserFunc (inst.User, Nx.List.ClickToName[click], inst.Selected, id)
 			end
 
@@ -6480,8 +6481,7 @@ function Nx.List:OnBut (but, id, click)
 
 	self.ButData[-id] = but:GetPressed()
 
---	prt ("List but %d %s", id, tostring (self.ButData[-id]))
-
+--	prt ("List but %d %s", id, tostring (self.ButData[-id]))	
 	if self.UserFunc then
 		self.UserFunc (self.User, "button", id, self.ButData[-id], click, but)
 	end

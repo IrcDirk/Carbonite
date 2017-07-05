@@ -1755,7 +1755,7 @@ function Nx.Social:AddLocalPunk (name, plyrNear, level, class)
 			local s = UnitName (unit)
 			if s then
 
-				local pX, pY = GetPlayerMapPosition (unit)
+				local pX, pY = Nx.Map.GetPlayerMapPosition (unit)
 
 				if pX ~= 0 or pY ~= 0 then
 					x = pX * 100
@@ -1805,10 +1805,6 @@ end
 ---------------------------------------------------------------------------------------
 
 function Nx.Social:GetPunk (name, plyrNear, mId, x, y)
-	if mId > 1000 then ------ Work around to stop chat spam, to be removed at a later date once everyone is using the official code over work around version.
-		return
-	end
-
 	if Nx.scdb.profile.Social.PunkEnable then
 	local punk = self.PunksActive[name]
 	if not punk then
@@ -2513,7 +2509,7 @@ function Nx.Social.TeamHUD:Update()
 
 --				Nx.prt ("Pal %s %s", name, per)
 
-				local pX, pY = GetPlayerMapPosition (unit)
+				local pX, pY = Nx.Map.GetPlayerMapPosition (unit)
 
 				if pX == 0 then
 					player.Dist = 999999

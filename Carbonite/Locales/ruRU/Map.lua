@@ -29,6 +29,7 @@ L["Show Mining Locations"] = "Показать расположение руд"
 L["Show Artifact Locations"] = "Показать расположение артифактов"
 L["Show Guide POIs"] = "Показать POI"
 L["Show Custom Icons"] = "Показать пользовательские значки"
+L["Show World Quests"] = true
 L["Show Archaeology Blobs"] = "Показать зоны археологии"
 L["Show Quest Blobs"] = "Показать точки квестов"
 L["Show Unexplored Areas"] = "Показать неиследованные территории"
@@ -100,7 +101,7 @@ L["players"] = "игроки"
 L["Unknown map name"] = "Неизвестное имя карты"
 
 -- Battle ground messages
-L["Incoming"] = true		-- why was it commented?
+L["Incoming"] = "Наступайте"		-- why was it commented? --mb because of next string?
 L["Inc"] = "Наступайте"
 L["Clear"] = "Очистите"
 L["Help"] = "Помогите"
